@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Input;
 using spectrespy.Api;
 using spectrespy.Models;
+using System.Collections.Generic;
 
 namespace spectrespy.ViewModels
 {
@@ -131,76 +132,112 @@ namespace spectrespy.ViewModels
 
         private async Task LoadAllDataAsync()
         {
-            try
-            {
-                IsLoading = true;
-                StatusMessage = "Refreshing data...";
-                _refreshCommand?.RaiseCanExecuteChanged();
+            IsLoading = true;
+            StatusMessage = "Refreshing data...";
+            _refreshCommand?.RaiseCanExecuteChanged();
 
-                // Parallelize API calls
-                var networkTask = LoadNetworkInfoAsync();
-                var priceTask = LoadPriceInfoAsync();
-                var marketCapTask = LoadMarketCapInfoAsync();
-                var healthTask = LoadHealthInfoAsync();
+            var errors = new List<string>();
 
-                await Task.WhenAll(networkTask, priceTask, marketCapTask, healthTask);
+            var tasks = new List<Task>
+            {
+                Task.Run(async () => {
+                    try { await LoadNetworkInfoAsync(); }
+                    catch (Exception ex) { errors.Add("Network info: " + ex.Message); }
+                }),
+                Task.Run(async () => {
+                    try { await LoadPriceInfoAsync(); }
+                    catch (Exception ex) { errors.Add("Price info: " + ex.Message); }
+                }),
+                Task.Run(async () => {
+                    try { await LoadMarketCapInfoAsync(); }
+                    catch (Exception ex) { errors.Add("Market cap: " + ex.Message); }
+                }),
+                Task.Run(async () => {
+                    try { await LoadHealthInfoAsync(); }
+                    catch (Exception ex) { errors.Add("Health info: " + ex.Message); }
+                })
+            };
 
-                LastUpdatedTime = DateTime.Now.ToString("g");
-                StatusMessage = "Data loaded successfully";
-            }
-            catch (Exception ex)
+            await Task.WhenAll(tasks);
+
+            LastUpdatedTime = DateTime.Now.ToString("g");
+            StatusMessage = errors.Count == 0 ? "Data loaded successfully" : "Some data failed: " + string.Join("; ", errors);
+            IsLoading = false;
+            _refreshCommand?.RaiseCanExecuteChanged();
+        }
+
+        private async Task<T?> RetryAsync<T>(Func<Task<T>> action, int maxAttempts = 3, int delayMs = 1000)
+        {
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
             {
-                StatusMessage = $"Error loading data: {ex.Message}";
-                // Do not show a MessageBox for network errors
-                // Optionally, log the error here if needed
+                try
+                {
+                    return await action();
+                }
+                catch when (attempt < maxAttempts)
+                {
+                    await Task.Delay(delayMs);
+                }
             }
-            finally
-            {
-                IsLoading = false;
-                _refreshCommand?.RaiseCanExecuteChanged();
-            }
+            return default;
         }
 
         private async Task LoadNetworkInfoAsync()
         {
-            var json = await _client.GetStringAsync("https://api.spectre-network.org/info/network");
-            var result = JsonSerializer.Deserialize<NetworkInfoModel>(json, new JsonSerializerOptions
+            var result = await RetryAsync(async () =>
             {
-                PropertyNameCaseInsensitive = true
+                var json = await _client.GetStringAsync("https://api.spectre-network.org/info/network");
+                return JsonSerializer.Deserialize<NetworkInfoModel>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
             });
+
             if (result != null)
                 NetworkInfo = result;
         }
 
         private async Task LoadPriceInfoAsync()
         {
-            var json = await _client.GetStringAsync("https://api.spectre-network.org/info/price?stringOnly=false");
-            var result = JsonSerializer.Deserialize<PriceInfoModel>(json, new JsonSerializerOptions
+            var result = await RetryAsync(async () =>
             {
-                PropertyNameCaseInsensitive = true
+                var json = await _client.GetStringAsync("https://api.spectre-network.org/info/price?stringOnly=false");
+                return JsonSerializer.Deserialize<PriceInfoModel>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
             });
+
             if (result != null)
                 PriceInfo = result;
         }
 
         private async Task LoadMarketCapInfoAsync()
         {
-            var json = await _client.GetStringAsync("https://api.spectre-network.org/info/marketcap?stringOnly=false");
-            var result = JsonSerializer.Deserialize<MarketCapInfoModel>(json, new JsonSerializerOptions
+            var result = await RetryAsync(async () =>
             {
-                PropertyNameCaseInsensitive = true
+                var json = await _client.GetStringAsync("https://api.spectre-network.org/info/marketcap?stringOnly=false");
+                return JsonSerializer.Deserialize<MarketCapInfoModel>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
             });
+
             if (result != null)
                 MarketCapInfo = result;
         }
 
         private async Task LoadHealthInfoAsync()
         {
-            var json = await _client.GetStringAsync("https://api.spectre-network.org/info/health");
-            var result = JsonSerializer.Deserialize<HealthInfoModel>(json, new JsonSerializerOptions
+            var result = await RetryAsync(async () =>
             {
-                PropertyNameCaseInsensitive = true
+                var json = await _client.GetStringAsync("https://api.spectre-network.org/info/health");
+                return JsonSerializer.Deserialize<HealthInfoModel>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
             });
+
             if (result != null)
                 HealthInfo = result;
         }
