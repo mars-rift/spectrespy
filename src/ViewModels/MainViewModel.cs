@@ -151,8 +151,8 @@ namespace spectrespy.ViewModels
             catch (Exception ex)
             {
                 StatusMessage = $"Error loading data: {ex.Message}";
-                MessageBox.Show($"Error loading data: {ex.Message}", "Data Loading Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                // Do not show a MessageBox for network errors
+                // Optionally, log the error here if needed
             }
             finally
             {
