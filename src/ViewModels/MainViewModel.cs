@@ -111,12 +111,12 @@ namespace spectrespy.ViewModels
             set { _isLoading = value; OnPropertyChanged(); }
         }
 
-        private ICommand? _refreshCommand;
+        private AsyncRelayCommand? _refreshCommand;
         public ICommand RefreshCommand
         {
             get
             {
-                _refreshCommand ??= new RelayCommand(_ => LoadAllDataAsync());
+                _refreshCommand ??= new AsyncRelayCommand(LoadAllDataAsync, () => !IsLoading);
                 return _refreshCommand;
             }
         }
@@ -124,35 +124,40 @@ namespace spectrespy.ViewModels
         public MainViewModel()
         {
             _client = new HttpClient();
-            
             StatusMessage = "Loading data...";
-            
             // Start loading data
-            LoadAllDataAsync();
+            _ = LoadAllDataAsync();
         }
 
-        private async void LoadAllDataAsync()
+        private async Task LoadAllDataAsync()
         {
             try
             {
                 IsLoading = true;
                 StatusMessage = "Refreshing data...";
-                
-                await LoadNetworkInfoAsync();
-                await LoadPriceInfoAsync();
-                await LoadMarketCapInfoAsync();
-                await LoadHealthInfoAsync();
+                _refreshCommand?.RaiseCanExecuteChanged();
 
-                IsLoading = false;
+                // Parallelize API calls
+                var networkTask = LoadNetworkInfoAsync();
+                var priceTask = LoadPriceInfoAsync();
+                var marketCapTask = LoadMarketCapInfoAsync();
+                var healthTask = LoadHealthInfoAsync();
+
+                await Task.WhenAll(networkTask, priceTask, marketCapTask, healthTask);
+
                 LastUpdatedTime = DateTime.Now.ToString("g");
                 StatusMessage = "Data loaded successfully";
             }
             catch (Exception ex)
             {
-                IsLoading = false;
                 StatusMessage = $"Error loading data: {ex.Message}";
-                MessageBox.Show($"Error loading data: {ex.Message}", "Data Loading Error", 
+                MessageBox.Show($"Error loading data: {ex.Message}", "Data Loading Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsLoading = false;
+                _refreshCommand?.RaiseCanExecuteChanged();
             }
         }
 
