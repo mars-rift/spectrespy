@@ -168,12 +168,20 @@
                 <StackPanel>
                     <TextBlock Text="Health Status" Style="{StaticResource SubheadingStyle}"/>
                     
-                    <TextBlock Text="Database Synced" Style="{StaticResource DataLabelStyle}"/>
-                    <TextBlock Text="{Binding HealthInfo.database.isSynced, Converter={StaticResource BoolToYesNoConverter}}" 
+                    <TextBlock Text="Is Synced" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Text="{Binding SpectredInfo.isSynced, Converter={StaticResource BoolToYesNoConverter}}" 
                                Style="{StaticResource DataValueStyle}"/>
                     
-                    <TextBlock Text="Blue Score" Style="{StaticResource DataLabelStyle}"/>
-                    <TextBlock Text="{Binding HealthInfo.database.blueScore, StringFormat=N0}" 
+                    <TextBlock Text="Server Version" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Text="{Binding SpectredInfo.serverVersion}" 
+                               Style="{StaticResource DataValueStyle}"/>
+                    
+                    <TextBlock Text="Mempool Size" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Text="{Binding SpectredInfo.mempoolSize}" 
+                               Style="{StaticResource DataValueStyle}"/>
+                    
+                    <TextBlock Text="UTXO Indexed" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Text="{Binding SpectredInfo.isUtxoIndexed, Converter={StaticResource BoolToYesNoConverter}}" 
                                Style="{StaticResource DataValueStyle}"/>
                 </StackPanel>
             </Border>

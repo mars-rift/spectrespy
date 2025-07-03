@@ -35,6 +35,15 @@ namespace spectrespy.ViewModels
         public double marketcap { get; set; }
     }
 
+    public class SpectredInfoModel
+    {
+        public string? mempoolSize { get; set; }
+        public string? serverVersion { get; set; }
+        public bool isUtxoIndexed { get; set; }
+        public bool isSynced { get; set; }
+        public string? p2pIdHashed { get; set; }
+    }
+
     public class SpectredServer
     {
         public string? spectredHost { get; set; }
@@ -89,6 +98,13 @@ namespace spectrespy.ViewModels
         {
             get => _healthInfo;
             set { _healthInfo = value; OnPropertyChanged(); }
+        }
+
+        private SpectredInfoModel _spectredInfo = new SpectredInfoModel();
+        public SpectredInfoModel SpectredInfo
+        {
+            get => _spectredInfo;
+            set { _spectredInfo = value; OnPropertyChanged(); }
         }
 
         private string _lastUpdatedTime = string.Empty;
@@ -155,6 +171,10 @@ namespace spectrespy.ViewModels
                 Task.Run(async () => {
                     try { await LoadHealthInfoAsync(); }
                     catch (Exception ex) { errors.Add("Health info: " + ex.Message); }
+                }),
+                Task.Run(async () => {
+                    try { await LoadSpectredInfoAsync(); }
+                    catch (Exception ex) { errors.Add("Spectred info: " + ex.Message); }
                 })
             };
 
@@ -240,6 +260,21 @@ namespace spectrespy.ViewModels
 
             if (result != null)
                 HealthInfo = result;
+        }
+
+        private async Task LoadSpectredInfoAsync()
+        {
+            var result = await RetryAsync(async () =>
+            {
+                var json = await _client.GetStringAsync("https://api.spectre-network.org/info/spectred");
+                return JsonSerializer.Deserialize<SpectredInfoModel>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            });
+
+            if (result != null)
+                SpectredInfo = result;
         }
 
         protected void OnPropertyChanged([CallerMemberName] string? name = null)

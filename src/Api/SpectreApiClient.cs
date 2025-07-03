@@ -79,10 +79,26 @@ namespace spectrespy.Api
             }
         }
 
+        public async Task<SpectredInfoModel> GetSpectredInfoAsync()
+        {
+            try
+            {
+                // This matches the new spectred endpoint
+                return await _httpClient.GetFromJsonAsync<SpectredInfoModel>("info/spectred")
+                    ?? new SpectredInfoModel();
+            }
+            catch (HttpRequestException)
+            {
+                // Return default data on failure
+                return new SpectredInfoModel();
+            }
+        }
+
         // Synchronous wrappers for the async methods
         public Task<NetworkInfo> GetNetworkInfo() => GetNetworkInfoAsync();
         public Task<PriceInfo> GetPriceInfo() => GetPriceInfoAsync();
         public Task<HealthInfo> GetHealthInfo() => GetHealthInfoAsync();
         public Task<MarketCapInfo> GetMarketCapInfo() => GetMarketCapInfoAsync();
+        public Task<SpectredInfoModel> GetSpectredInfo() => GetSpectredInfoAsync();
     }
 }
