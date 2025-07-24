@@ -1,7 +1,7 @@
 # SpectreSpy
 
 ## Overview
-SpectreSpy is a Windows application designed to interact with the Spectre Network API. It retrieves and displays various financial data in a modern dark-themed interface, suitable for cryptocurrency and fintech applications.
+SpectreSpy is a Windows application designed to interact with the Spectre Network API. It retrieves and displays chain data in a modern dark-themed interface.
 
 ## Features
 - Fetches network information, price data, health status, and market capitalization from the Spectre Network API.
@@ -36,7 +36,7 @@ spectrespy
 5. Run the application.
 
 ## Usage
-- Upon launching the application, the main window will display various financial metrics retrieved from the Spectre Network API.
+- Upon launching the application, the main window will display chain info retrieved from the Spectre Network API.
 - The data is updated in real-time, providing users with the latest information.
 
 ## Spectre Network API
