@@ -94,11 +94,83 @@ namespace spectrespy.Api
             }
         }
 
+        public async Task<HashrateInfo> GetHashrateInfoAsync()
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<HashrateInfo>("info/hashrate")
+                    ?? new HashrateInfo();
+            }
+            catch (HttpRequestException)
+            {
+                return new HashrateInfo();
+            }
+        }
+
+        public async Task<MaxHashrateInfo> GetMaxHashrateInfoAsync()
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<MaxHashrateInfo>("info/hashrate/max")
+                    ?? new MaxHashrateInfo();
+            }
+            catch (HttpRequestException)
+            {
+                return new MaxHashrateInfo();
+            }
+        }
+
+        public async Task<BlockRewardInfo> GetBlockRewardInfoAsync()
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<BlockRewardInfo>("info/blockreward")
+                    ?? new BlockRewardInfo();
+            }
+            catch (HttpRequestException)
+            {
+                return new BlockRewardInfo();
+            }
+        }
+
+        public async Task<HalvingInfo> GetHalvingInfoAsync()
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<HalvingInfo>("info/halving")
+                    ?? new HalvingInfo();
+            }
+            catch (HttpRequestException)
+            {
+                return new HalvingInfo();
+            }
+        }
+
+        public async Task<AddressLookup> GetAddressTransactionsAsync(string address)
+        {
+            try
+            {
+                var result = await _httpClient.GetFromJsonAsync<AddressLookup>($"addresses/{address}/transactions")
+                    ?? new AddressLookup();
+                result.address = address;
+                return result;
+            }
+            catch (HttpRequestException)
+            {
+                return new AddressLookup { address = address };
+            }
+        }
+
         // Synchronous wrappers for the async methods
         public Task<NetworkInfo> GetNetworkInfo() => GetNetworkInfoAsync();
         public Task<PriceInfo> GetPriceInfo() => GetPriceInfoAsync();
         public Task<HealthInfo> GetHealthInfo() => GetHealthInfoAsync();
         public Task<MarketCapInfo> GetMarketCapInfo() => GetMarketCapInfoAsync();
         public Task<SpectredInfoModel> GetSpectredInfo() => GetSpectredInfoAsync();
+        public Task<HashrateInfo> GetHashrateInfo() => GetHashrateInfoAsync();
+        public Task<MaxHashrateInfo> GetMaxHashrateInfo() => GetMaxHashrateInfoAsync();
+        public Task<BlockRewardInfo> GetBlockRewardInfo() => GetBlockRewardInfoAsync();
+        public Task<HalvingInfo> GetHalvingInfo() => GetHalvingInfoAsync();
+        public Task<AddressLookup> GetAddressTransactions(string address) => GetAddressTransactionsAsync(address);
     }
 }

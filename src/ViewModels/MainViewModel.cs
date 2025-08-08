@@ -107,6 +107,63 @@ namespace spectrespy.ViewModels
             set { _spectredInfo = value; OnPropertyChanged(); }
         }
 
+        // New enhanced properties
+        private HashrateInfo _hashrateInfo = new HashrateInfo();
+        public HashrateInfo HashrateInfo
+        {
+            get => _hashrateInfo;
+            set { _hashrateInfo = value; OnPropertyChanged(); }
+        }
+
+        private MaxHashrateInfo _maxHashrateInfo = new MaxHashrateInfo();
+        public MaxHashrateInfo MaxHashrateInfo
+        {
+            get => _maxHashrateInfo;
+            set { _maxHashrateInfo = value; OnPropertyChanged(); }
+        }
+
+        private BlockRewardInfo _blockRewardInfo = new BlockRewardInfo();
+        public BlockRewardInfo BlockRewardInfo
+        {
+            get => _blockRewardInfo;
+            set { _blockRewardInfo = value; OnPropertyChanged(); }
+        }
+
+        private HalvingInfo _halvingInfo = new HalvingInfo();
+        public HalvingInfo HalvingInfo
+        {
+            get => _halvingInfo;
+            set { _halvingInfo = value; OnPropertyChanged(); }
+        }
+
+        private AddressLookup _addressLookup = new AddressLookup();
+        public AddressLookup AddressLookup
+        {
+            get => _addressLookup;
+            set { _addressLookup = value; OnPropertyChanged(); }
+        }
+
+        private string _addressToLookup = string.Empty;
+        public string AddressToLookup
+        {
+            get => _addressToLookup;
+            set { _addressToLookup = value; OnPropertyChanged(); }
+        }
+
+        private int _successfulConnections;
+        public int SuccessfulConnections
+        {
+            get => _successfulConnections;
+            set { _successfulConnections = value; OnPropertyChanged(); }
+        }
+
+        private int _failedConnections;
+        public int FailedConnections
+        {
+            get => _failedConnections;
+            set { _failedConnections = value; OnPropertyChanged(); }
+        }
+
         private string _lastUpdatedTime = string.Empty;
         public string LastUpdatedTime
         {
@@ -175,10 +232,30 @@ namespace spectrespy.ViewModels
                 Task.Run(async () => {
                     try { await LoadSpectredInfoAsync(); }
                     catch (Exception ex) { errors.Add("Spectred info: " + ex.Message); }
+                }),
+                Task.Run(async () => {
+                    try { await LoadHashrateInfoAsync(); }
+                    catch (Exception ex) { errors.Add("Hashrate info: " + ex.Message); }
+                }),
+                Task.Run(async () => {
+                    try { await LoadMaxHashrateInfoAsync(); }
+                    catch (Exception ex) { errors.Add("Max hashrate info: " + ex.Message); }
+                }),
+                Task.Run(async () => {
+                    try { await LoadBlockRewardInfoAsync(); }
+                    catch (Exception ex) { errors.Add("Block reward: " + ex.Message); }
+                }),
+                Task.Run(async () => {
+                    try { await LoadHalvingInfoAsync(); }
+                    catch (Exception ex) { errors.Add("Halving info: " + ex.Message); }
                 })
             };
 
             await Task.WhenAll(tasks);
+
+            // Update connection statistics
+            SuccessfulConnections += (9 - errors.Count);
+            FailedConnections += errors.Count;
 
             LastUpdatedTime = DateTime.Now.ToString("g");
             StatusMessage = errors.Count == 0 ? "Data loaded successfully" : "Some data failed: " + string.Join("; ", errors);
@@ -275,6 +352,66 @@ namespace spectrespy.ViewModels
 
             if (result != null)
                 SpectredInfo = result;
+        }
+
+        private async Task LoadHashrateInfoAsync()
+        {
+            var result = await RetryAsync(async () =>
+            {
+                var json = await _client.GetStringAsync("https://api.spectre-network.org/info/hashrate");
+                return JsonSerializer.Deserialize<HashrateInfo>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            });
+
+            if (result != null)
+                HashrateInfo = result;
+        }
+
+        private async Task LoadMaxHashrateInfoAsync()
+        {
+            var result = await RetryAsync(async () =>
+            {
+                var json = await _client.GetStringAsync("https://api.spectre-network.org/info/hashrate/max");
+                return JsonSerializer.Deserialize<MaxHashrateInfo>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            });
+
+            if (result != null)
+                MaxHashrateInfo = result;
+        }
+
+        private async Task LoadBlockRewardInfoAsync()
+        {
+            var result = await RetryAsync(async () =>
+            {
+                var json = await _client.GetStringAsync("https://api.spectre-network.org/info/blockreward");
+                return JsonSerializer.Deserialize<BlockRewardInfo>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            });
+
+            if (result != null)
+                BlockRewardInfo = result;
+        }
+
+        private async Task LoadHalvingInfoAsync()
+        {
+            var result = await RetryAsync(async () =>
+            {
+                var json = await _client.GetStringAsync("https://api.spectre-network.org/info/halving");
+                return JsonSerializer.Deserialize<HalvingInfo>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            });
+
+            if (result != null)
+                HalvingInfo = result;
         }
 
         protected void OnPropertyChanged([CallerMemberName] string? name = null)

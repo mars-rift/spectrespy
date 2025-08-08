@@ -31,19 +31,19 @@
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="#DDDDDD"/>
-            <Setter Property="Margin" Value="0,5,0,2"/>
+            <Setter Property="Margin" Value="0,2,0,5"/>
         </Style>
         
         <Style x:Key="DataValueStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="Margin" Value="0,0,0,3"/>
         </Style>
         
         <Style x:Key="DataLabelStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Foreground" Value="#AAAAAA"/>
-            <Setter Property="Margin" Value="0,0,0,2"/>
+            <Setter Property="Margin" Value="0,3,0,1"/>
         </Style>
         
         <!-- Button Style -->
@@ -129,22 +129,26 @@
         </Border>
         
         <!-- Main Content Area -->
-        <Grid Grid.Row="1" Margin="15">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <ScrollViewer Grid.Row="1" Margin="15" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
             
             <!-- Network Statistics -->
             <Border Grid.Column="0" Grid.Row="0" 
                     Background="#252525" 
                     Margin="0,0,7.5,7.5" 
                     CornerRadius="8" 
-                    Padding="15">
+                    Padding="12"
+                    MinHeight="180">
                 <StackPanel>
                     <TextBlock Text="Network Statistics" Style="{StaticResource SubheadingStyle}"/>
                     
@@ -162,9 +166,10 @@
             <!-- Health Info -->
             <Border Grid.Column="1" Grid.Row="0" 
                     Background="#252525" 
-                    Margin="7.5,0,0,7.5" 
+                    Margin="7.5,0,7.5,7.5" 
                     CornerRadius="8" 
-                    Padding="15">
+                    Padding="12"
+                    MinHeight="180">
                 <StackPanel>
                     <TextBlock Text="Health Status" Style="{StaticResource SubheadingStyle}"/>
                     
@@ -186,6 +191,39 @@
                 </StackPanel>
             </Border>
             
+            <!-- Mining Information (New) -->
+            <Border Grid.Column="2" Grid.Row="0" 
+                    Background="#252525" 
+                    Margin="7.5,0,0,7.5" 
+                    CornerRadius="8" 
+                    Padding="12"
+                    MinHeight="180">
+                <StackPanel>
+                    <TextBlock Text="Mining Info" Style="{StaticResource SubheadingStyle}"/>
+                    
+                    <TextBlock Text="Current Hashrate" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Text="{Binding HashrateInfo.HashrateFormatted}" 
+                               Style="{StaticResource DataValueStyle}"
+                               FontWeight="Bold" 
+                               Foreground="#6E56CF"/>
+                    
+                    <TextBlock Text="Peak Hashrate" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Text="{Binding MaxHashrateInfo.HashrateFormatted}" 
+                               Style="{StaticResource DataValueStyle}"
+                               FontWeight="Bold" 
+                               Foreground="#4CAF50"/>
+                    
+                    <TextBlock Text="Block Reward" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Text="{Binding BlockRewardInfo.BlockRewardFormatted}" 
+                               Style="{StaticResource DataValueStyle}"/>
+                    
+                    <TextBlock Text="Peak at Block" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Text="{Binding MaxHashrateInfo.blockheader.daaScore, StringFormat=N0}" 
+                               Style="{StaticResource DataValueStyle}" 
+                               FontSize="10"/>
+                </StackPanel>
+            </Border>
+            
             <!-- Additional Data Section 1 -->
             <Border Grid.Column="0" Grid.Row="1" 
                     Background="#252525" 
@@ -193,20 +231,31 @@
                     CornerRadius="8" 
                     Padding="15">
                 <StackPanel>
-                    <TextBlock Text="Virtual DAA Score" Style="{StaticResource SubheadingStyle}"/>
-                    <TextBlock Text="{Binding NetworkInfo.virtualDaaScore}" Style="{StaticResource DataValueStyle}"/>
+                    <TextBlock Text="Blockchain Details" Style="{StaticResource SubheadingStyle}"/>
                     
-                    <TextBlock Text="Pruning Point Hash" Style="{StaticResource SubheadingStyle}" Margin="0,15,0,2"/>
+                    <TextBlock Text="Virtual DAA Score" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Text="{Binding NetworkInfo.virtualDaaScore}" 
+                               Style="{StaticResource DataValueStyle}"
+                               FontWeight="Bold" 
+                               Foreground="#6E56CF"/>
+                    
+                    <TextBlock Text="Pruning Point Hash" Style="{StaticResource DataLabelStyle}" Margin="0,10,0,2"/>
                     <TextBlock Text="{Binding NetworkInfo.pruningPointHash}" 
                                Style="{StaticResource DataValueStyle}"
-                               TextWrapping="Wrap"/>
+                               TextWrapping="Wrap"
+                               FontSize="11"/>
+                    
+                    <TextBlock Text="Past Median Time" Style="{StaticResource DataLabelStyle}" Margin="0,10,0,2"/>
+                    <TextBlock Text="{Binding NetworkInfo.pastMedianTime}" 
+                               Style="{StaticResource DataValueStyle}"
+                               FontSize="12"/>
                 </StackPanel>
             </Border>
             
             <!-- Additional Data Section 2 -->
             <Border Grid.Column="1" Grid.Row="1" 
                     Background="#252525" 
-                    Margin="7.5,7.5,0,0" 
+                    Margin="7.5,7.5,7.5,0" 
                     CornerRadius="8" 
                     Padding="15">
                 <StackPanel>
@@ -222,7 +271,84 @@
                     </ItemsControl>
                 </StackPanel>
             </Border>
+            
+            <!-- Halving Information (New) -->
+            <Border Grid.Column="2" Grid.Row="1" 
+                    Background="#252525" 
+                    Margin="7.5,7.5,0,0" 
+                    CornerRadius="8" 
+                    Padding="15">
+                <StackPanel>
+                    <TextBlock Text="Next Halving" Style="{StaticResource SubheadingStyle}"/>
+                    
+                    <TextBlock Text="Time Until Halving" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Text="{Binding HalvingInfo.TimeUntilHalving}" 
+                               Style="{StaticResource DataValueStyle}"
+                               FontWeight="Bold" 
+                               Foreground="#6E56CF"/>
+                    
+                    <TextBlock Text="Next Halving Date" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Text="{Binding HalvingInfo.nextHalvingDate}" 
+                               Style="{StaticResource DataValueStyle}"/>
+                    
+                    <TextBlock Text="New Block Reward" Style="{StaticResource DataLabelStyle}"/>
+                    <TextBlock Text="{Binding HalvingInfo.NextHalvingAmountFormatted}" 
+                               Style="{StaticResource DataValueStyle}"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Connection Statistics (New) -->
+            <Border Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3"
+                    Background="#252525" 
+                    Margin="0,7.5,0,0" 
+                    CornerRadius="8" 
+                    Padding="15">
+                <StackPanel>
+                    <TextBlock Text="Network Analytics" Style="{StaticResource SubheadingStyle}"/>
+                    
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Hashrate Details" Style="{StaticResource DataLabelStyle}" FontWeight="Bold"/>
+                            <TextBlock Text="Current" Style="{StaticResource DataLabelStyle}"/>
+                            <TextBlock Text="{Binding HashrateInfo.HashrateFormatted}" 
+                                       Style="{StaticResource DataValueStyle}"
+                                       Foreground="#6E56CF"/>
+                            <TextBlock Text="Peak" Style="{StaticResource DataLabelStyle}"/>
+                            <TextBlock Text="{Binding MaxHashrateInfo.HashrateFormatted}" 
+                                       Style="{StaticResource DataValueStyle}"
+                                       Foreground="#4CAF50"/>
+                            <TextBlock Text="Raw Current" Style="{StaticResource DataLabelStyle}"/>
+                            <TextBlock Text="{Binding HashrateInfo.hashrate, StringFormat=E6}" 
+                                       Style="{StaticResource DataValueStyle}" 
+                                       FontSize="10"/>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Peak Block Details" Style="{StaticResource DataLabelStyle}" FontWeight="Bold"/>
+                            <TextBlock Text="DAA Score" Style="{StaticResource DataLabelStyle}"/>
+                            <TextBlock Text="{Binding MaxHashrateInfo.blockheader.daaScore, StringFormat=N0}" 
+                                       Style="{StaticResource DataValueStyle}"/>
+                            <TextBlock Text="Difficulty" Style="{StaticResource DataLabelStyle}"/>
+                            <TextBlock Text="{Binding MaxHashrateInfo.blockheader.FormattedDifficulty}" 
+                                       Style="{StaticResource DataValueStyle}"/>
+                            <TextBlock Text="Peak Time" Style="{StaticResource DataLabelStyle}"/>
+                            <TextBlock Text="{Binding MaxHashrateInfo.blockheader.FormattedTimestamp}" 
+                                       Style="{StaticResource DataValueStyle}" 
+                                       FontSize="10"/>
+                        </StackPanel>
+                        
+                        <!-- Connection statistics available in status bar -->
+                    </Grid>
+                </StackPanel>
+            </Border>
         </Grid>
+        </ScrollViewer>
         
         <!-- Status Bar -->
         <Border Grid.Row="2" Background="#1A1A1A" Padding="10,5">
@@ -245,6 +371,13 @@
                              Background="Transparent" 
                              Foreground="#6E56CF"
                              VerticalAlignment="Bottom"/>
+                
+                <!-- Connection Stats -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="API Status: " Foreground="#AAAAAA" FontSize="12"/>
+                    <TextBlock Text="{Binding SuccessfulConnections, StringFormat='✓{0}'}" Foreground="#4CAF50" FontSize="12" Margin="0,0,5,0"/>
+                    <TextBlock Text="{Binding FailedConnections, StringFormat='✗{0}'}" Foreground="#F44336" FontSize="12"/>
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>
